@@ -1,0 +1,19 @@
+services:
+  cvat_server:
+    build:
+      context: .
+      args:
+        http_proxy:
+        https_proxy:
+    environment:
+      COGNITO_DOMAIN: ${COGNITO_DOMAIN}
+      COGNITO_APP_ID: ${COGNITO_APP_ID}
+      # COGNITO_APP_SECRET: ${COGNITO_APP_SECRET} # Uncomment if you have a client secret
+
+  cvat_ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+      args:
+        REACT_APP_COGNITO_DOMAIN: ${REACT_APP_COGNITO_DOMAIN}
+        REACT_APP_COGNITO_APP_ID: ${REACT_APP_COGNITO_APP_ID}
