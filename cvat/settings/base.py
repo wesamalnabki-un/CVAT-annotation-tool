@@ -771,8 +771,17 @@ SMOKESCREEN_ENABLED = True
 
 # By default, email backend is django.core.mail.backends.smtp.EmailBackend
 # But it won't work without additional configuration, so we set it to None
-# to check configuration and throw ImproperlyConfigured if thats a case
-EMAIL_BACKEND = None
+# to check configuration and throw ImproperlyConfigured if thats a case.
+# You can use environment variables to configure it.
+EMAIL_BACKEND = os.getenv("CVAT_EMAIL_BACKEND", None)
+EMAIL_HOST = os.getenv("CVAT_EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.getenv("CVAT_EMAIL_PORT", 25))
+EMAIL_USE_TLS = to_bool(os.getenv("CVAT_EMAIL_USE_TLS", False))
+EMAIL_USE_SSL = to_bool(os.getenv("CVAT_EMAIL_USE_SSL", False))
+EMAIL_HOST_USER = os.getenv("CVAT_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("CVAT_EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("CVAT_EMAIL_FROM", "webmaster@localhost")
+ACCOUNT_EMAIL_SUBJECT_PREFIX = os.getenv("CVAT_EMAIL_SUBJECT_PREFIX", "[CVAT] ")
 
 ONE_RUNNING_JOB_IN_QUEUE_PER_USER = to_bool(os.getenv("ONE_RUNNING_JOB_IN_QUEUE_PER_USER", False))
 
