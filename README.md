@@ -95,6 +95,42 @@ Prebuilt docker images are the easiest way to start using CVAT locally. They are
 
 The images have been downloaded more than 1M times so far.
 
+## Email Configuration 📧
+
+To use organization invitations or email-based membership features, you must configure an email backend. You can do this by setting the following environment variables for the `cvat_server` service:
+
+### For Development/Testing (Manual Links)
+If you don't have an SMTP server, you can use the console backend to print invitation links to the container logs:
+```yaml
+CVAT_EMAIL_BACKEND: 'django.core.mail.backends.console.EmailBackend'
+```
+To see the links: `docker logs cvat_server -f`
+
+### For Production (SMTP)
+| Variable | Description | Default |
+| --- | --- | --- |
+| `CVAT_EMAIL_BACKEND` | Django email backend | `None` |
+| `CVAT_EMAIL_HOST` | SMTP server host | `localhost` |
+| `CVAT_EMAIL_PORT` | SMTP server port | `25` |
+| `CVAT_EMAIL_USE_TLS` | Use TLS (true/false) | `false` |
+| `CVAT_EMAIL_USE_SSL` | Use SSL (true/false) | `false` |
+| `CVAT_EMAIL_HOST_USER` | SMTP username | `""` |
+| `CVAT_EMAIL_HOST_PASSWORD` | SMTP password | `""` |
+| `CVAT_EMAIL_FROM` | Sender email address | `webmaster@localhost` |
+| `CVAT_EMAIL_SUBJECT_PREFIX` | Email subject prefix | `[CVAT] ` |
+
+Example for Gmail:
+```yaml
+CVAT_EMAIL_BACKEND: 'django.core.mail.backends.smtp.EmailBackend'
+CVAT_EMAIL_HOST: 'smtp.gmail.com'
+CVAT_EMAIL_PORT: 587
+CVAT_EMAIL_USE_TLS: 'true'
+CVAT_EMAIL_HOST_USER: 'your-email@gmail.com'
+CVAT_EMAIL_HOST_PASSWORD: 'your-app-password'
+CVAT_EMAIL_FROM: 'your-email@gmail.com'
+```
+
+
 ## Screencasts 🎦
 
 Here are some screencasts showing how to use CVAT.
