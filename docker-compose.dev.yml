@@ -98,6 +98,8 @@ services:
         https_proxy:
         no_proxy:
         socks_proxy:
+        REACT_APP_COGNITO_DOMAIN: ${COGNITO_DOMAIN:-}
+        REACT_APP_COGNITO_APP_ID: ${COGNITO_APP_ID:-}
       dockerfile: Dockerfile.ui
 
   cvat_clickhouse:

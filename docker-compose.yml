@@ -26,6 +26,10 @@ x-backend-env: &backend-env
   CVAT_EMAIL_HOST_PASSWORD: ${CVAT_EMAIL_HOST_PASSWORD:-}
   CVAT_EMAIL_FROM: ${CVAT_EMAIL_FROM:-webmaster@localhost}
   CVAT_EMAIL_SUBJECT_PREFIX: ${CVAT_EMAIL_SUBJECT_PREFIX:-[CVAT] }
+  COGNITO_DOMAIN: ${COGNITO_DOMAIN:-}
+  COGNITO_APP_ID: ${COGNITO_APP_ID:-}
+  COGNITO_APP_SECRET: ${COGNITO_APP_SECRET:-}
+  CVAT_BASE_URL: ${CVAT_BASE_URL:-}
 
 x-backend-deps: &backend-deps
   cvat_redis_inmem:
@@ -99,7 +103,6 @@ services:
       ADAPTIVE_AUTO_ANNOTATION: 'false'
       NUMPROCS: 2
       CVAT_ANALYTICS: 1
-      CVAT_BASE_URL:
       ONE_RUNNING_JOB_IN_QUEUE_PER_USER:
     command: init run server
     labels:
