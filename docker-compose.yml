@@ -17,6 +17,15 @@ x-backend-env: &backend-env
   DJANGO_LOG_SERVER_PORT: 8282
   no_proxy: clickhouse,grafana,vector,nuclio,opa,${no_proxy:-}
   SMOKESCREEN_OPTS: ${SMOKESCREEN_OPTS:-}
+  CVAT_EMAIL_BACKEND: ${CVAT_EMAIL_BACKEND:-}
+  CVAT_EMAIL_HOST: ${CVAT_EMAIL_HOST:-localhost}
+  CVAT_EMAIL_PORT: ${CVAT_EMAIL_PORT:-25}
+  CVAT_EMAIL_USE_TLS: ${CVAT_EMAIL_USE_TLS:-false}
+  CVAT_EMAIL_USE_SSL: ${CVAT_EMAIL_USE_SSL:-false}
+  CVAT_EMAIL_HOST_USER: ${CVAT_EMAIL_HOST_USER:-}
+  CVAT_EMAIL_HOST_PASSWORD: ${CVAT_EMAIL_HOST_PASSWORD:-}
+  CVAT_EMAIL_FROM: ${CVAT_EMAIL_FROM:-webmaster@localhost}
+  CVAT_EMAIL_SUBJECT_PREFIX: ${CVAT_EMAIL_SUBJECT_PREFIX:-[CVAT] }
 
 x-backend-deps: &backend-deps
   cvat_redis_inmem:
@@ -53,11 +62,7 @@ services:
     container_name: cvat_redis_inmem
     image: redis:7.2.11-alpine
     restart: always
-    command: [
-      "redis-server",
-      "--save", "60", "100",
-      "--appendonly", "yes",
-    ]
+    command: [ "redis-server", "--save", "60", "100", "--appendonly", "yes" ]
     volumes:
       - cvat_inmem_db:/data
     networks:
@@ -77,9 +82,7 @@ services:
       - cvat_cache_db:/var/lib/kvrocks
     networks:
       - cvat
-    command: [
-      "--compact-cron", "0 3 * * *",
-      ]
+    command: [ "--compact-cron", "0 3 * * *" ]
 
   cvat_server:
     container_name: cvat_server
@@ -88,10 +91,9 @@ services:
     depends_on:
       <<: *backend-deps
       cvat_opa:
-        condition:
-          service_started
+        condition: service_started
     environment:
-      <<: [*backend-env, *clickhouse-env]
+      <<: [ *backend-env, *clickhouse-env ]
       DJANGO_MODWSGI_EXTRA_ARGS: ''
       ALLOWED_HOSTS: '*'
       ADAPTIVE_AUTO_ANNOTATION: 'false'
@@ -103,10 +105,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.services.cvat.loadbalancer.server.port: "8080"
-      traefik.http.routers.cvat.rule:
-        Host(`${CVAT_HOST:-localhost}`) &&
-        (PathPrefix(`/api/`) || PathPrefix(`/static/`) || PathPrefix(`/admin`)
-          || PathPrefix(`/django-rq`))
+      traefik.http.routers.cvat.rule: Host(`${CVAT_HOST:-localhost}`) && (PathPrefix(`/api/`) || PathPrefix(`/static/`) || PathPrefix(`/admin`) || PathPrefix(`/django-rq`))
       traefik.http.routers.cvat.entrypoints: web
     volumes:
       - cvat_data:/home/django/data
@@ -156,7 +155,7 @@ services:
     restart: always
     depends_on: *backend-deps
     environment:
-      <<: [*backend-env, *clickhouse-env]
+      <<: [ *backend-env, *clickhouse-env ]
       NUMPROCS: 2
     command: run worker export
     volumes:
@@ -425,6 +424,7 @@ volumes:
   cvat_inmem_db:
   cvat_events_db:
   cvat_cache_db:
+
 
 networks:
   cvat:
