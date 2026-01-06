@@ -25,10 +25,10 @@ function LogoutComponent(): JSX.Element {
                 localStorage.setItem('logoutInProgress', 'true');
 
                 if (COGNITO_DOMAIN && CLIENT_ID) {
-                    // Cognito often throws "Missing redirect_uri" because it defaults to a re-login flow on /logout
-                    // if it doesn't like the logout_uri or configuration.
-                    // Using redirect_uri with response_type=code is more robust for some Cognito setups.
-                    const logoutUrl = `${COGNITO_DOMAIN}/logout?client_id=${CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(LOGOUT_URI)}`;
+                    // We must redirect to Cognito to clear the session there.
+                    // IMPORTANT: The parameter for the return URL is 'logout_uri', NOT 'redirect_uri'.
+                    // You must add http://localhost:8080/auth/login to your "Allowed sign-out URLs" in AWS Cognito.
+                    const logoutUrl = `${COGNITO_DOMAIN}/logout?client_id=${CLIENT_ID}&logout_uri=${encodeURIComponent(LOGOUT_URI)}`;
                     console.log('Redirecting to Cognito logout:', logoutUrl);
                     window.location.href = logoutUrl;
                 } else {

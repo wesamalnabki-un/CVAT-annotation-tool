@@ -13,10 +13,13 @@ import SigningLayout, { formSizes } from 'components/signing-common/signing-layo
 
 const { Title, Text } = Typography;
 
+import LoginForm, { LoginData } from './login-form';
+
 interface LoginPageComponentProps {
     user: any;
     fetching: boolean;
     hasEmailVerificationBeenSent: boolean;
+    onLogin: (loginData: LoginData) => void;
     onLoginWithCognito: (code: string, callbackUrl: string) => void;
 }
 
@@ -24,8 +27,10 @@ function LoginPageComponent(props: LoginPageComponentProps & RouteComponentProps
     const history = useHistory();
     const location = useLocation();
     const {
-        user, fetching, hasEmailVerificationBeenSent, onLoginWithCognito,
+        user, fetching, hasEmailVerificationBeenSent, onLoginWithCognito, onLogin,
     } = props;
+
+    const [showCredentialsForm, setShowCredentialsForm] = React.useState(false);
 
     // Track if we have already attempted a redirect in this session
     const redirectAttempted = React.useRef(false);
@@ -43,37 +48,6 @@ function LoginPageComponent(props: LoginPageComponentProps & RouteComponentProps
         }
     }, [location.search, fetching, user]);
 
-    // Automatically redirect to Cognito if we are on the login page and not logged in
-    useEffect(() => {
-        // If we are logged in, fetching, or already tried to redirect, do nothing
-        if (user || fetching || redirectAttempted.current) {
-            return;
-        }
-
-        const params = new URLSearchParams(location.search);
-        const code = params.get('code');
-        const error = params.get('error');
-
-        // Check if we just logged out using a flag in localStorage
-        const logoutInProgress = localStorage.getItem('logoutInProgress');
-        if (logoutInProgress === 'true') {
-            console.log('Skipping auto-redirect because a logout just occurred.');
-            localStorage.removeItem('logoutInProgress');
-            return;
-        }
-
-        // VERY IMPORTANT:
-        // If we have a code or error, it means we just came back from Cognito.
-        // In both cases, DO NOT redirect again.
-        if (code || error) {
-            return;
-        }
-
-        console.log('No auth code found and not logged in. Redirecting to Cognito SSO...');
-        redirectAttempted.current = true;
-        handleSSOLogin();
-    }, [location.search, fetching, user]);
-
     if (hasEmailVerificationBeenSent) {
         history.push('/auth/email-verification-sent');
     }
@@ -88,7 +62,6 @@ function LoginPageComponent(props: LoginPageComponentProps & RouteComponentProps
             return;
         }
 
-        // Removed identity_provider=Google to allow any Cognito login method
         const authUrl = `${COGNITO_DOMAIN}/oauth2/authorize?client_id=${CLIENT_ID}&response_type=code&scope=email+openid+profile&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
 
         console.log('Redirecting to SSO:', authUrl);
@@ -100,28 +73,51 @@ function LoginPageComponent(props: LoginPageComponentProps & RouteComponentProps
             <Col {...formSizes.wrapper}>
                 <Row justify='center'>
                     <Col {...formSizes.form} style={{ textAlign: 'center' }}>
-                        <Title level={2}>Welcome to CVAT</Title>
-                        <Text type="secondary" style={{ display: 'block', marginBottom: '24px' }}>
-                            Please wait while we redirect you to the login page...
-                        </Text>
-                        <Button
-                            className='cvat-login-sso-button'
-                            type="primary"
-                            size="large"
-                            onClick={handleSSOLogin}
-                            loading={fetching}
-                            block
-                            style={{
-                                height: '50px',
-                                fontSize: '16px',
-                                borderRadius: '8px',
-                            }}
-                        >
-                            Sign in with SSO
-                        </Button>
-                        <Text type="secondary" style={{ display: 'block', marginTop: '24px', fontSize: '12px' }}>
-                            Authentication is secured by Amazon Cognito.
-                        </Text>
+                        {showCredentialsForm ? (
+                            <>
+                                <LoginForm
+                                    fetching={fetching}
+                                    onSubmit={onLogin}
+                                    renderResetPassword={false}
+                                    renderRegistrationComponent={false}
+                                    renderBasicLoginComponent={true}
+                                />
+                                <div style={{ marginTop: '16px' }}>
+                                    <Button type="link" onClick={() => setShowCredentialsForm(false)}>
+                                        Back to SSO Login
+                                    </Button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <Title level={2}>Welcome to CVAT</Title>
+                                <Button
+                                    className='cvat-login-sso-button'
+                                    type="primary"
+                                    size="large"
+                                    onClick={handleSSOLogin}
+                                    loading={fetching}
+                                    block
+                                    style={{
+                                        height: '50px',
+                                        fontSize: '16px',
+                                        borderRadius: '8px',
+                                        marginBottom: '24px',
+                                    }}
+                                >
+                                    Sign in with SSO
+                                </Button>
+                                <Text type="secondary" style={{ display: 'block', fontSize: '12px' }}>
+                                    Authentication is secured by Amazon Cognito.
+                                </Text>
+
+                                <div style={{ marginTop: '32px', borderTop: '1px solid #eee', paddingTop: '24px' }}>
+                                    <Button type="link" onClick={() => setShowCredentialsForm(true)}>
+                                        Login with Credentials (Superuser)
+                                    </Button>
+                                </div>
+                            </>
+                        )}
                     </Col>
                 </Row>
             </Col>

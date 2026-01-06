@@ -40,12 +40,28 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml down -v
 
 To prevent "Ghost User" conflicts (where invitations sit on a temporary account instead of the real worker account), please follow this workflow when onboarding new workers:
 
-1.  **Worker Log In First**: Ask the new worker to log into the CVAT instance via **Cognito/SSO** at least once. This creates their permanent account in the system.
+1.  **Worker Log In First**: Ask the new worker to log into the CVAT instance or sign up via **Cognito/SSO** at least once. This creates their permanent account in the system.
 2.  **Send Invite**: After the worker has an account, the Administrator sends the invitation to their exact email.
 3.  **Accepting the Invite**: The worker clicks the link in their email.
 4.  **Crucial Step - Switch Organization**:
     *   Once logged in, the worker **must** click the "Personal" dropdown in the top header and select the relevant **Organization (e.g., UNOPS)**.
     *   Tasks assigned to the organization will **not** appear until the worker switches to that organization's view.
+
+---
+
+## 👑 User Management (Superuser Creation)
+
+To have full administrative access (access to all projects, organizations, and the Django Admin panel) without relying on Cognito organizations, you can create a localized **Superuser**.
+
+### **Creating a Superuser via CLI**
+Run the following command while the application is running:
+
+```bash
+docker exec -it cvat_server python3 manage.py createsuperuser
+```
+Follow the prompts to configure the **Username**, **Email**, and **Password**.
+
+> **Note**: This user has `is_staff` and `is_superuser` status, granting complete control over the CVAT instance.
 
 ---
 
