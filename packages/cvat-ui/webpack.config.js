@@ -8,6 +8,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const CopyPlugin = require('copy-webpack-plugin');
+const PnpWebpackPlugin = require('pnp-webpack-plugin');
 
 module.exports = (env) => {
     const defaultAppConfig = path.join(__dirname, 'src/config.tsx');
@@ -85,6 +86,9 @@ module.exports = (env) => {
             fallback: {
                 fs: false,
             },
+            plugins: [
+                PnpWebpackPlugin,
+            ],
             alias: {
                 config$: appConfigFile,
 
@@ -93,11 +97,21 @@ module.exports = (env) => {
                 // and adds 'import React from "react";'
                 // in plugins it leads to errors because they must import '@modules/react'
                 // so, this alias added to fix it
-                react: '@modules/react',
+                // react: '@modules/react',
                 '@root': path.resolve(__dirname, 'src'),
-                '@modules': path.resolve(__dirname, '..', 'node_modules'),
+                // '@modules': path.resolve(__dirname, '..', 'node_modules'),
+                '@modules': path.resolve(__dirname, '../../node_modules'),
+                react: path.resolve(__dirname, '../../node_modules/react'),
+                'react-dom': path.resolve(__dirname, '../../node_modules/react-dom')
+                // react: require.resolve('react'),
+                // 'react-dom': require.resolve('react-dom'),
             },
             modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+        },
+        resolveLoader: {
+            plugins: [
+                PnpWebpackPlugin.moduleLoader(module),
+            ],
         },
         module: {
             rules: [
@@ -192,13 +206,13 @@ module.exports = (env) => {
                         to: 'assets/3rdparty/',
                     },
                     {
-                        from: '../node_modules/onnxruntime-web/dist/*.wasm',
+                        from: '../../node_modules/onnxruntime-web/dist/*.wasm',
                         to: 'assets/[name][ext]',
                     },
-                    {
-                        from: '../node_modules/onnxruntime-web/dist/*.mjs',
-                        to: 'assets/[name][ext]',
-                    },
+                    // {
+                        // from: '../../node_modules/onnxruntime-web/dist/*.mjs',
+                        // to: 'assets/[name][ext]',
+                    // },
                     {
                         from: 'src/assets/opencv_4.8.0.js',
                         to: 'assets/opencv_4.8.0.js',

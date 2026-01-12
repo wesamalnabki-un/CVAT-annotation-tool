@@ -8,7 +8,7 @@ fail() {
 }
 
 wait_for_db() {
-    wait-for-it "${CVAT_POSTGRES_HOST}:${CVAT_POSTGRES_PORT:-5432}" -t 0
+    wait-for-it "${CVAT_POSTGRES_HOST}:${5433:-5432}" -t 0
 }
 
 wait_for_redis_inmem() {
