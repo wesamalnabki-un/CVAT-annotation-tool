@@ -1,27 +1,28 @@
 ARG PIP_VERSION=24.0
 ARG BASE_IMAGE=ubuntu:22.04
+ARG GLIBRARY_TOKEN
 
 FROM ${BASE_IMAGE} AS build-image-base
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -yq \
-    curl \
-    g++ \
-    gcc \
-    git \
-    libgeos-dev \
-    libldap2-dev \
-    libsasl2-dev \
-    make \
-    nasm \
-    pkg-config \
-    python3-dev \
-    python3-pip \
-    libxml2-dev \
-    libxmlsec1-dev \
-    libxmlsec1-openssl \
-    libhdf5-dev \
-    cargo \
+        curl \
+        g++ \
+        gcc \
+        git \
+        libgeos-dev \
+        libldap2-dev \
+        libsasl2-dev \
+        make \
+        nasm \
+        pkg-config \
+        python3-dev \
+        python3-pip \
+        libxml2-dev \
+        libxmlsec1-dev \
+        libxmlsec1-openssl \
+        libhdf5-dev \
+        cargo \
     && rm -rf /var/lib/apt/lists/*
 
 ARG PIP_VERSION
@@ -49,10 +50,10 @@ WORKDIR /tmp/ffmpeg
 RUN curl -sL https://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz --output - | \
     tar -zx --strip-components=1 && \
     ./configure --disable-nonfree --disable-gpl --enable-libopenh264 \
-    --enable-shared --disable-static --disable-doc --disable-programs --prefix="${PREFIX}" && \
+        --enable-shared --disable-static --disable-doc --disable-programs --prefix="${PREFIX}" && \
     make -j5 && make install && make clean
 
-COPY extra/utils/dataset_manifest/requirements.txt /tmp/utils/dataset_manifest/requirements.txt
+COPY utils/dataset_manifest/requirements.txt /tmp/utils/dataset_manifest/requirements.txt
 
 # Since we're using pip-compile-multi, each dependency can only be listed in
 # one requirements file. In the case of PyAV, that should be
@@ -70,7 +71,7 @@ RUN --mount=type=cache,target=/root/.cache/pip/http-v2 \
 FROM build-image-base AS build-image
 
 COPY cvat/requirements/ /tmp/cvat/requirements/
-COPY extra/utils/dataset_manifest/requirements.txt /tmp/utils/dataset_manifest/requirements.txt
+COPY utils/dataset_manifest/requirements.txt /tmp/utils/dataset_manifest/requirements.txt
 
 # Exclude av from the requirements file
 RUN sed -i '/^av==/d' /tmp/utils/dataset_manifest/requirements.txt
@@ -111,28 +112,28 @@ ENV DJANGO_SETTINGS_MODULE="cvat.settings.${CVAT_CONFIGURATION}"
 # Install necessary apt packages
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -yq \
-    bzip2 \
-    ca-certificates \
-    curl \
-    git \
-    libgeos-c1v5 \
-    libgl1 \
-    libgomp1 \
-    libldap-2.5-0 \
-    libpython3.10 \
-    libsasl2-2 \
-    libxml2 \
-    libxmlsec1 \
-    libxmlsec1-openssl \
-    nginx \
-    p7zip-full \
-    poppler-utils \
-    python3 \
-    python3-venv \
-    supervisor \
-    tzdata \
-    unrar \
-    wait-for-it \
+        bzip2 \
+        ca-certificates \
+        curl \
+        git \
+        libgeos-c1v5 \
+        libgl1 \
+        libgomp1 \
+        libldap-2.5-0 \
+        libpython3.10 \
+        libsasl2-2 \
+        libxml2 \
+        libxmlsec1 \
+        libxmlsec1-openssl \
+        nginx \
+        p7zip-full \
+        poppler-utils \
+        python3 \
+        python3-venv \
+        supervisor \
+        tzdata \
+        unrar \
+        wait-for-it \
     && ln -fs /usr/share/zoneinfo/${TZ} /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata && \
     rm -rf /var/lib/apt/lists/*
@@ -147,14 +148,14 @@ RUN adduser --uid=1000 --shell /bin/bash --disabled-password --gecos "" ${USER}
 
 ARG CLAM_AV="no"
 RUN if [ "$CLAM_AV" = "yes" ]; then \
-    apt-get update && \
-    apt-get --no-install-recommends install -yq \
-    clamav \
-    libclamunrar9 && \
-    sed -i 's/ReceiveTimeout 30/ReceiveTimeout 300/g' /etc/clamav/freshclam.conf && \
-    freshclam && \
-    chown -R ${USER}:${USER} /var/lib/clamav && \
-    rm -rf /var/lib/apt/lists/*; \
+        apt-get update && \
+        apt-get --no-install-recommends install -yq \
+            clamav \
+            libclamunrar9 && \
+        sed -i 's/ReceiveTimeout 30/ReceiveTimeout 300/g' /etc/clamav/freshclam.conf && \
+        freshclam && \
+        chown -R ${USER}:${USER} /var/lib/clamav && \
+        rm -rf /var/lib/apt/lists/*; \
     fi
 
 # Install wheels from the build image
@@ -169,7 +170,9 @@ ARG PIP_DISABLE_PIP_VERSION_CHECK=1
 RUN python -m pip install -U pip==${PIP_VERSION}
 RUN --mount=type=bind,from=build-image,source=/tmp/wheelhouse,target=/mnt/wheelhouse \
     --mount=type=bind,from=build-image-av,source=/tmp/wheelhouse,target=/mnt/wheelhouse-av \
-    python -m pip install --no-index /mnt/wheelhouse/*.whl /mnt/wheelhouse-av/*.whl
+    python -m pip install --no-index /mnt/wheelhouse/*.whl /mnt/wheelhouse-av/*.whl \
+    python -m pip install --no-cache-dir git+https://${GLIBRARY_TOKEN}@github.com/UNGP-Disha-Library.git@v1.0.0#egg=ungp_disha_library[pydantic_v2]
+
 
 ENV NUMPROCS=1
 COPY --from=build-image-av /opt/ffmpeg/lib /usr/lib
@@ -178,7 +181,7 @@ COPY --from=build-image-av /opt/ffmpeg/lib /usr/lib
 # This library allows remote python debugging with VS Code
 ARG CVAT_DEBUG_ENABLED
 RUN if [ "${CVAT_DEBUG_ENABLED}" = 'yes' ]; then \
-    python3 -m pip install --no-cache-dir debugpy; \
+        python3 -m pip install --no-cache-dir debugpy; \
     fi
 
 # Removing pip due to security reasons. See: https://scout.docker.com/vulnerabilities/id/CVE-2018-20225
@@ -191,13 +194,13 @@ COPY cvat/nginx.conf /etc/nginx/nginx.conf
 COPY --chown=${USER} supervisord/ ${HOME}/supervisord
 COPY --chown=${USER} backend_entrypoint.d/ ${HOME}/backend_entrypoint.d
 COPY --chown=${USER} manage.py rqscheduler.py backend_entrypoint.sh wait_for_deps.sh ${HOME}/
-COPY --chown=${USER} extra/utils/ ${HOME}/utils
+COPY --chown=${USER} utils/ ${HOME}/utils
 COPY --chown=${USER} cvat/ ${HOME}/cvat
 COPY --chown=${USER} components/analytics/clickhouse/init.py ${HOME}/components/analytics/clickhouse/init.py
 
 ARG COVERAGE_PROCESS_START
 RUN if [ "${COVERAGE_PROCESS_START}" ]; then \
-    echo "import coverage; coverage.process_startup()" > /opt/venv/lib/python3.10/site-packages/coverage_subprocess.pth; \
+        echo "import coverage; coverage.process_startup()" > /opt/venv/lib/python3.10/site-packages/coverage_subprocess.pth; \
     fi
 
 # RUN all commands below as 'django' user.

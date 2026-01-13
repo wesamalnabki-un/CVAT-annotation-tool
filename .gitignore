@@ -77,3 +77,6 @@ cvat-ui/dist
 **/!.yarn/releases
 **/!.yarn/sdks
 **/!.yarn/versions
+/cvat-ui/.env
+/packages_old/cvat-ui_old/
+/my_README.md

@@ -8,7 +8,7 @@
 services:
   cvat_db:
     ports:
-      - '127.0.0.1:5433:5432'
+      - '127.0.0.1:5432:5432'
 
   cvat_server:
     build:
@@ -30,77 +30,75 @@ services:
     ports:
       - '127.0.0.1:9090:9090'
 
-#  cvat_worker_export:
-#    environment:
-#      # For debugging, make sure to set 1 process
-#      # Due to the supervisord specifics, the extra processes will fail and
-#      # after few attempts supervisord will give up restarting, leaving only 1 process
-#      # NUMPROCS: 1
-#      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
-#      CVAT_DEBUG_PORT: '9092'
-#      COVERAGE_PROCESS_START:
-#    ports:
-#      - '9092:9092'
-#
-#  cvat_worker_import:
-#    environment:
-#      # For debugging, make sure to set 1 process
-#      # Due to the supervisord specifics, the extra processes will fail and
-#      # after few attempts supervisord will give up restarting, leaving only 1 process
-#      # NUMPROCS: 1
-#      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
-#      CVAT_DEBUG_PORT: '9093'
-#      COVERAGE_PROCESS_START:
-#    ports:
-#      - '127.0.0.1:9093:9093'
-#
-#  cvat_worker_quality_reports:
-#    environment:
-#      # For debugging, make sure to set 1 process
-#      # Due to the supervisord specifics, the extra processes will fail and
-#      # after few attempts supervisord will give up restarting, leaving only 1 process
-#      # NUMPROCS: 1
-#      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
-#      CVAT_DEBUG_PORT: '9094'
-#      COVERAGE_PROCESS_START:
-#    ports:
-#      - '127.0.0.1:9094:9094'
-#
-#  cvat_worker_consensus:
-#    environment:
-#      # For debugging, make sure to set 1 process
-#      # Due to the supervisord specifics, the extra processes will fail and
-#      # after few attempts supervisord will give up restarting, leaving only 1 process
-#      # NUMPROCS: 1
-#      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
-#      CVAT_DEBUG_PORT: '9096'
-#      COVERAGE_PROCESS_START:
-#    ports:
-#      - '127.0.0.1:9096:9096'
-#
-#  cvat_worker_annotation:
-#    environment:
-#      # For debugging, make sure to set 1 process
-#      # Due to the supervisord specifics, the extra processes will fail and
-#      # after few attempts supervisord will give up restarting, leaving only 1 process
-#      # NUMPROCS: 1
-#      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
-#      CVAT_DEBUG_PORT: '9091'
-#      COVERAGE_PROCESS_START:
-#    ports:
-#      - '127.0.0.1:9091:9091'
+  cvat_worker_export:
+    environment:
+      # For debugging, make sure to set 1 process
+      # Due to the supervisord specifics, the extra processes will fail and
+      # after few attempts supervisord will give up restarting, leaving only 1 process
+      # NUMPROCS: 1
+      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
+      CVAT_DEBUG_PORT: '9092'
+      COVERAGE_PROCESS_START:
+    ports:
+      - '9092:9092'
 
-#  cvat_ui:
-#    build:
-#      context: .
-#      args:
-#        http_proxy:
-#        https_proxy:
-#        no_proxy:
-#        socks_proxy:
-#        REACT_APP_COGNITO_DOMAIN: ${COGNITO_DOMAIN:-}
-#        REACT_APP_COGNITO_APP_ID: ${COGNITO_APP_ID:-}
-#      dockerfile: Dockerfile.ui
+  cvat_worker_import:
+    environment:
+      # For debugging, make sure to set 1 process
+      # Due to the supervisord specifics, the extra processes will fail and
+      # after few attempts supervisord will give up restarting, leaving only 1 process
+      # NUMPROCS: 1
+      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
+      CVAT_DEBUG_PORT: '9093'
+      COVERAGE_PROCESS_START:
+    ports:
+      - '127.0.0.1:9093:9093'
+
+  cvat_worker_quality_reports:
+    environment:
+      # For debugging, make sure to set 1 process
+      # Due to the supervisord specifics, the extra processes will fail and
+      # after few attempts supervisord will give up restarting, leaving only 1 process
+      # NUMPROCS: 1
+      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
+      CVAT_DEBUG_PORT: '9094'
+      COVERAGE_PROCESS_START:
+    ports:
+      - '127.0.0.1:9094:9094'
+
+  cvat_worker_consensus:
+    environment:
+      # For debugging, make sure to set 1 process
+      # Due to the supervisord specifics, the extra processes will fail and
+      # after few attempts supervisord will give up restarting, leaving only 1 process
+      # NUMPROCS: 1
+      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
+      CVAT_DEBUG_PORT: '9096'
+      COVERAGE_PROCESS_START:
+    ports:
+      - '127.0.0.1:9096:9096'
+
+  cvat_worker_annotation:
+    environment:
+      # For debugging, make sure to set 1 process
+      # Due to the supervisord specifics, the extra processes will fail and
+      # after few attempts supervisord will give up restarting, leaving only 1 process
+      # NUMPROCS: 1
+      CVAT_DEBUG_ENABLED: '${CVAT_DEBUG_ENABLED:-no}'
+      CVAT_DEBUG_PORT: '9091'
+      COVERAGE_PROCESS_START:
+    ports:
+      - '127.0.0.1:9091:9091'
+
+  cvat_ui:
+    build:
+      context: .
+      args:
+        http_proxy:
+        https_proxy:
+        no_proxy:
+        socks_proxy:
+      dockerfile: Dockerfile.ui
 
   cvat_clickhouse:
     ports:

@@ -9,40 +9,36 @@ RUN npm install -g corepack
 COPY .yarnrc.yml /tmp/
 COPY package.json /tmp/
 COPY yarn.lock /tmp/
-COPY packages/cvat-core/package.json /tmp/cvat-core/
-COPY packages/cvat-canvas/package.json /tmp/cvat-canvas/
-COPY packages/cvat-canvas3d/package.json /tmp/cvat-canvas3d/
-COPY packages/cvat-ui/package.json /tmp/cvat-ui/
-COPY packages/cvat-data/package.json /tmp/cvat-data/
+COPY cvat-core/package.json /tmp/cvat-core/
+COPY cvat-canvas/package.json /tmp/cvat-canvas/
+COPY cvat-canvas3d/package.json /tmp/cvat-canvas3d/
+COPY cvat-ui/package.json /tmp/cvat-ui/
+COPY cvat-data/package.json /tmp/cvat-data/
 
 # Install common dependencies
 WORKDIR /tmp/
 RUN DISABLE_HUSKY=1 yarn install --immutable
 
 # Build source code
-COPY packages/cvat-data/ /tmp/cvat-data/
-COPY packages/cvat-core/ /tmp/cvat-core/
-COPY packages/cvat-canvas3d/ /tmp/cvat-canvas3d/
-COPY packages/cvat-canvas/ /tmp/cvat-canvas/
-COPY packages/cvat-ui/ /tmp/cvat-ui/
+COPY cvat-data/ /tmp/cvat-data/
+COPY cvat-core/ /tmp/cvat-core/
+COPY cvat-canvas3d/ /tmp/cvat-canvas3d/
+COPY cvat-canvas/ /tmp/cvat-canvas/
+COPY cvat-ui/ /tmp/cvat-ui/
 
 ARG UI_APP_CONFIG
 ARG CLIENT_PLUGINS
 ARG DISABLE_SOURCE_MAPS
 ARG SOURCE_MAPS_TOKEN
-ARG REACT_APP_COGNITO_DOMAIN
-ARG REACT_APP_COGNITO_APP_ID
 
 RUN CLIENT_PLUGINS="${CLIENT_PLUGINS}" \
-    DISABLE_SOURCE_MAPS="${DISABLE_SOURCE_MAPS}" \
-    UI_APP_CONFIG="${UI_APP_CONFIG}" \
-    SOURCE_MAPS_TOKEN="${SOURCE_MAPS_TOKEN}" \
-    REACT_APP_COGNITO_DOMAIN="${REACT_APP_COGNITO_DOMAIN}" \
-    REACT_APP_COGNITO_APP_ID="${REACT_APP_COGNITO_APP_ID}" yarn run build:cvat-ui
+DISABLE_SOURCE_MAPS="${DISABLE_SOURCE_MAPS}" \
+UI_APP_CONFIG="${UI_APP_CONFIG}" \
+SOURCE_MAPS_TOKEN="${SOURCE_MAPS_TOKEN}" yarn run build:cvat-ui
 
 FROM nginxinc/nginx-unprivileged:1.29.2-alpine3.22-slim
 
 # Replace default.conf configuration to remove unnecessary rules
-COPY packages/cvat-ui/react_nginx.conf /etc/nginx/conf.d/default.conf
-COPY packages/cvat-ui/robots.txt /usr/share/nginx/html/
+COPY cvat-ui/react_nginx.conf /etc/nginx/conf.d/default.conf
+COPY cvat-ui/robots.txt /usr/share/nginx/html/
 COPY --from=cvat-ui /tmp/cvat-ui/dist /usr/share/nginx/html/

@@ -37,6 +37,7 @@ import { getServerAPISchemaAsync } from 'actions/server-actions';
 import { navigationActions } from 'actions/navigation-actions';
 import { CombinedState, NotificationsState, PluginsState } from './reducers';
 import './utils/dayjs-wrapper';
+import { AuthProvider } from './AuthDISHAProvider';
 
 createCVATStore(createRootReducer);
 
@@ -155,8 +156,10 @@ const root = createRoot(document.getElementById('root') as HTMLDivElement);
 root.render((
     <Provider store={cvatStore}>
         <BrowserRouter>
-            <PluginsEntrypoint />
-            <ReduxAppWrapper />
+            <AuthProvider>
+                <PluginsEntrypoint />
+                <ReduxAppWrapper />
+            </AuthProvider>
         </BrowserRouter>
         <LayoutGrid />
     </Provider>
