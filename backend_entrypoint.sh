@@ -8,7 +8,7 @@ fail() {
 }
 
 wait_for_db() {
-    wait-for-it "${CVAT_POSTGRES_HOST}:${5433:-5432}" -t 0
+    wait-for-it "${CVAT_POSTGRES_HOST}:${CVAT_POSTGRES_PORT:-5432}" -t 0
 }
 
 wait_for_redis_inmem() {
@@ -35,46 +35,6 @@ cmd_init() {
         wait_for_clickhouse
         python components/analytics/clickhouse/init.py
     fi
-
-    # Automatically update Site domain and SocialApp to match CVAT_BASE_URL and Cognito settings
-    ~/manage.py shell <<EOF
-import os
-from urllib.parse import urlparse
-from django.contrib.sites.models import Site
-try:
-    # 1. Update Site Domain
-    base_url = os.environ.get('CVAT_BASE_URL')
-    if base_url:
-        parsed_url = urlparse(base_url)
-        domain = parsed_url.netloc
-        site = Site.objects.get(id=os.environ.get('SITE_ID', 1))
-        if site.domain != domain:
-            print(f"Updating site domain from {site.domain} to {domain}")
-            site.domain = domain
-            site.name = domain
-            site.save()
-
-        # 2. Register Cognito Social App (required for SSO to work)
-        from allauth.socialaccount.models import SocialApp
-        client_id = os.environ.get('COGNITO_APP_ID')
-        secret = os.environ.get('COGNITO_APP_SECRET')
-        if client_id and secret:
-            app, created = SocialApp.objects.get_or_create(
-                provider='amazon_cognito',
-                defaults={'name': 'Cognito', 'client_id': client_id, 'secret': secret}
-            )
-            if not created and (app.client_id != client_id or app.secret != secret):
-                print("Updating Cognito SocialApp credentials...")
-                app.client_id = client_id
-                app.secret = secret
-                app.save()
-            app.sites.add(site)
-            print("Cognito SocialApp is registered and linked to site.")
-    else:
-        print("CVAT_BASE_URL is not set, skipping site/SSO update")
-except Exception as e:
-    print(f"Could not update site/SSO configuration: {e}")
-EOF
 }
 
 _get_includes() {

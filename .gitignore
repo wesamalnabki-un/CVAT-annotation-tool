@@ -50,7 +50,6 @@ yarn-error.log*
 node_modules
 /*env*/
 /.*env*
-!/.env.example
 perfkit.egg-info/
 
 # Ignore all js dists
@@ -78,6 +77,3 @@ cvat-ui/dist
 **/!.yarn/releases
 **/!.yarn/sdks
 **/!.yarn/versions
-/packages/cvat_keys/secret_key.py
-/packages/cvat_logs/
-/packages/cvat-core/dist/
