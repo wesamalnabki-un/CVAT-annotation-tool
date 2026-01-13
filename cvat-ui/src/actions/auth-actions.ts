@@ -144,27 +144,6 @@ export const loginAsync = (credential: string, password: string): ThunkAction =>
     }
 };
 
-export const loginWithCognitoAsync = (code: string, callbackUrl: string): ThunkAction => async (dispatch) => {
-    dispatch(authActions.login());
-    console.log('Starting loginWithCognitoAsync with code:', code);
-
-    try {
-        await cvat.server.loginWithCognito(code, callbackUrl);
-        console.log('cvat.server.loginWithCognito successful');
-        const users = await cvat.users.get({ self: true });
-        console.log('Fetched self user:', users[0]);
-        if (users[0]) {
-            dispatch(authActions.loginSuccess(users[0]));
-        } else {
-            console.error('No user returned from cvat.users.get({ self: true })');
-            dispatch(authActions.loginFailed(new Error('No user data returned from server')));
-        }
-    } catch (error) {
-        console.error('loginWithCognitoAsync failed:', error);
-        dispatch(authActions.loginFailed(error));
-    }
-};
-
 export const logoutAsync = (): ThunkAction => async (dispatch) => {
     dispatch(authActions.logout());
 
@@ -292,15 +271,6 @@ export const createApiTokenAsync = (
     }
 };
 
-type DispatchToProps = {
-    onLogin: typeof loginAsync;
-    onLoginWithCognito: typeof loginWithCognitoAsync;
-};
-
-export const mapDispatchToProps: DispatchToProps = {
-    onLogin: loginAsync,
-    onLoginWithCognito: loginWithCognitoAsync,
-};
 export const updateApiTokenAsync = (
     token: ApiToken,
     tokenData: ApiTokenModifiableFields,
