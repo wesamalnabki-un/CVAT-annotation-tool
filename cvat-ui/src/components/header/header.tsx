@@ -250,8 +250,8 @@ function HeaderComponent(props: Props): JSX.Element {
                         <Text type='secondary'>{` ${about.packageVersion.ui}`}</Text>
                     </p>
                     <Row justify='space-around'>
-                        {aboutLinks.sort((item1, item2) => item1[1] - item2[1])
-                            .map((item) => item[0])}
+                        { aboutLinks.sort((item1, item2) => item1[1] - item2[1])
+                            .map((item) => item[0]) }
                     </Row>
                 </div>
             ),
@@ -493,6 +493,19 @@ function HeaderComponent(props: Props): JSX.Element {
                 ) : null}
             </div>
             <div className='cvat-right-header'>
+                <CVATTooltip overlay='Click to open repository'>
+                    <Button
+                        icon={<GithubOutlined />}
+                        size='large'
+                        className='cvat-open-repository-button cvat-header-button'
+                        type='link'
+                        href={GITHUB_URL}
+                        onClick={(event: React.MouseEvent): void => {
+                            event.preventDefault();
+                            window.open(GITHUB_URL, '_blank');
+                        }}
+                    />
+                </CVATTooltip>
                 <CVATTooltip overlay='Click to open guide'>
                     <Button
                         icon={<QuestionCircleOutlined />}
@@ -531,13 +544,13 @@ function HeaderComponent(props: Props): JSX.Element {
                                     {user.username.length > 14 ? `${user.username.slice(0, 10)} ...` : user.username}
                                 </Text>
                             </Col>
-                            {currentOrganization ? (
+                            { currentOrganization ? (
                                 <Col span={24}>
                                     <Text className='cvat-header-menu-user-dropdown-organization'>
                                         {currentOrganization.slug}
                                     </Text>
                                 </Col>
-                            ) : null}
+                            ) : null }
                         </Row>
                         <CaretDownOutlined className='cvat-header-dropdown-icon' />
                     </span>
