@@ -5,30 +5,32 @@
 import { connect } from 'react-redux';
 import LoginPageComponent from 'components/login-page/login-page';
 import { CombinedState } from 'reducers';
-import { loginWithCognitoAsync, loginAsync } from 'actions/auth-actions';
+import { loginAsync } from 'actions/auth-actions';
 
 interface StateToProps {
-    user: any;
     fetching: boolean;
+    renderResetPassword: boolean;
     hasEmailVerificationBeenSent: boolean;
+    renderRegistrationComponent: boolean;
+    renderBasicLoginComponent: boolean;
 }
 
 interface DispatchToProps {
-    onLoginWithCognito: typeof loginWithCognitoAsync;
-    onLogin: (loginData: { credential: string; password: string }) => void;
+    onLogin: typeof loginAsync;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
     return {
-        user: state.auth.user,
         fetching: state.auth.fetching,
+        renderResetPassword: state.serverAPI.configuration.isPasswordResetEnabled,
+        renderRegistrationComponent: state.serverAPI.configuration.isRegistrationEnabled,
+        renderBasicLoginComponent: state.serverAPI.configuration.isBasicLoginEnabled,
         hasEmailVerificationBeenSent: state.auth.hasEmailVerificationBeenSent,
     };
 }
 
-const mapDispatchToProps = (dispatch: any): DispatchToProps => ({
-    onLoginWithCognito: (code: string, callbackUrl: string) => dispatch(loginWithCognitoAsync(code, callbackUrl)),
-    onLogin: (loginData: { credential: string; password: string }) => dispatch(loginAsync(loginData.credential, loginData.password)),
-});
+const mapDispatchToProps: DispatchToProps = {
+    onLogin: loginAsync,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginPageComponent);
