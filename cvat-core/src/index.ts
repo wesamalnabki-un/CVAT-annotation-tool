@@ -77,7 +77,6 @@ export default interface CVATCore {
         userAgreements: typeof serverProxy.server.userAgreements,
         register: any; // TODO: add types later
         login: any;
-        loginWithCognito: any;
         logout: any;
         changePassword: any;
         requestPasswordReset: any;

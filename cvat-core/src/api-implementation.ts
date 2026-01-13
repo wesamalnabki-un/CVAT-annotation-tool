@@ -111,9 +111,6 @@ export default function implementAPI(cvat: CVATCore): CVATCore {
     implementationMixin(cvat.server.login, async (username, password) => {
         await serverProxy.server.login(username, password);
     });
-    implementationMixin(cvat.server.loginWithCognito, async (code, callbackUrl) => {
-        await serverProxy.server.loginWithCognito(code, callbackUrl);
-    });
     implementationMixin(cvat.server.logout, async () => {
         await serverProxy.server.logout();
     });
@@ -549,21 +546,21 @@ export default function implementAPI(cvat: CVATCore): CVATCore {
             filter: Parameters<CVATCore['analytics']['quality']['settings']['get']>[0],
             aggregate?: Parameters<CVATCore['analytics']['quality']['settings']['get']>[1],
         ) => {
-        checkFilter(filter, {
-            taskID: isInteger,
-            projectID: isInteger,
-            parentType: isString,
+            checkFilter(filter, {
+                taskID: isInteger,
+                projectID: isInteger,
+                parentType: isString,
+            });
+
+            const params = fieldsToSnakeCase(filter);
+
+            const settingsList = await serverProxy.analytics.quality.settings.get(params, aggregate);
+            const schema = await getServerAPISchema();
+            const descriptions = convertDescriptions(schema.components.schemas.QualitySettings.properties);
+
+            const settings = settingsList.map((setting) => new QualitySettings({ ...setting, descriptions }));
+            return settings;
         });
-
-        const params = fieldsToSnakeCase(filter);
-
-        const settingsList = await serverProxy.analytics.quality.settings.get(params, aggregate);
-        const schema = await getServerAPISchema();
-        const descriptions = convertDescriptions(schema.components.schemas.QualitySettings.properties);
-
-        const settings = settingsList.map((setting) => new QualitySettings({ ...setting, descriptions }));
-        return settings;
-    });
     implementationMixin(cvat.analytics.events.export, async (
         filter: AnalyticsEventsFilter,
     ): ReturnType<CVATCore['analytics']['events']['export']> => {

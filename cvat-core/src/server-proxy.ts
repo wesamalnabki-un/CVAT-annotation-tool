@@ -322,7 +322,7 @@ Axios.interceptors.request.use((reqConfig) => {
     const { backendAPI } = config;
     const getInvitations = reqConfig.url.endsWith('/invitations') && reqConfig.method === 'get';
     const acceptDeclineInvitation = reqConfig.url.startsWith(`${backendAPI}/invitations`) &&
-        (reqConfig.url.endsWith('/accept') || reqConfig.url.endsWith('/decline'));
+                                    (reqConfig.url.endsWith('/accept') || reqConfig.url.endsWith('/decline'));
     if (getInvitations || acceptDeclineInvitation) {
         return reqConfig;
     }
@@ -556,22 +556,6 @@ async function authenticated(): Promise<boolean> {
     }
 
     return true;
-}
-
-async function loginWithCognito(code: string, callbackUrl: string): Promise<void> {
-    const { backendAPI } = config;
-
-    let response = null;
-    try {
-        response = await Axios.post(`${backendAPI}/auth/login/cognito`, {
-            code,
-            callback_url: callbackUrl,
-        });
-    } catch (errorData) {
-        throw generateError(errorData);
-    }
-
-    setAuthData(response);
 }
 
 async function getApiTokens(filter: APIApiTokensFilter = {}): Promise<PaginatedResource<SerializedRequest>> {
@@ -1981,7 +1965,7 @@ async function getCloudStorages(filter = {}): Promise<SerializedCloudStorage[] &
 }
 
 async function getCloudStorageContent(id: number, path: string, nextToken?: string, manifestPath?: string):
-    Promise<{ content: SerializedRemoteFile[], next: string | null }> {
+Promise<{ content: SerializedRemoteFile[], next: string | null }> {
     const { backendAPI } = config;
 
     let response = null;
@@ -2355,9 +2339,9 @@ async function getQualitySettings(
             response = {
                 data: await fetchAll<SerializedQualitySettingsData & { id: number }>(
                     `${backendAPI}/quality/settings`, {
-                    ...filter,
-                    ...enableOrganization(),
-                },
+                        ...filter,
+                        ...enableOrganization(),
+                    },
                 ),
             };
         } else {
@@ -2438,9 +2422,9 @@ async function getQualityConflicts(
     try {
         const response = await fetchAll<SerializedQualityConflictData & { id: number }>(
             `${backendAPI}/quality/conflicts`, {
-            ...params,
-            ...filter,
-        },
+                ...params,
+                ...filter,
+            },
         );
 
         return response.results;
@@ -2461,9 +2445,9 @@ async function getQualityReports(
             response = {
                 data: await fetchAll<SerializedQualityReportData & { id: number }>(
                     `${backendAPI}/quality/reports`, {
-                    ...filter,
-                    ...enableOrganization(),
-                },
+                        ...filter,
+                        ...enableOrganization(),
+                    },
                 ),
             };
         } else {
@@ -2488,7 +2472,6 @@ export default Object.freeze({
         share,
         formats,
         login,
-        loginWithCognito,
         logout,
         changePassword,
         requestPasswordReset,

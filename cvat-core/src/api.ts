@@ -81,10 +81,6 @@ function build(): CVATCore {
                 const result = await PluginRegistry.apiWrapper(cvat.server.login, username, password);
                 return result;
             },
-            async loginWithCognito(code, callbackUrl) {
-                const result = await PluginRegistry.apiWrapper(cvat.server.loginWithCognito, code, callbackUrl);
-                return result;
-            },
             async logout() {
                 const result = await PluginRegistry.apiWrapper(cvat.server.logout);
                 return result;
